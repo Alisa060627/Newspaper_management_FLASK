@@ -52,7 +52,7 @@ class NewspaperID(Resource):
     @newspaper_ns.marshal_with(paper_model, envelope='newspaper')
     def get(self, paper_id):
         search_result = Agency.get_instance().get_newspaper(paper_id)
-        return search_result
+        return search_result.to_dict()
 
     @newspaper_ns.doc(description="Update a new newspaper")
     @newspaper_ns.expect(paper_model, validate=True)
@@ -64,7 +64,7 @@ class NewspaperID(Resource):
         targeted_paper.price = newspaper_ns.payload["price"]
         targeted_paper.name = newspaper_ns.payload["name"]
         targeted_paper.frequency = newspaper_ns.payload["frequency"]
-        return targeted_paper
+        return targeted_paper.to_dict()
 
     @newspaper_ns.doc(description="Delete a new newspaper")
     def delete(self, paper_id):

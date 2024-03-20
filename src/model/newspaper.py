@@ -30,3 +30,8 @@ class Newspaper(object):
             "frequency": self.frequency,
             "price": self.price
         }
+    def get_issue(self, issue_id: int) -> Issue:
+        for issue in self.issues:
+            if issue.id == issue_id:
+                return issue
+        return None
