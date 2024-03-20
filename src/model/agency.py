@@ -17,8 +17,10 @@ class Agency(object):
         return Agency.singleton_instance
 
     def add_newspaper(self, new_paper: Newspaper):
-        #TODO: assert that ID does not exist  yet (or create a new one)
-        self.newspapers.append(new_paper)
+        if new_paper.paper_id not in [paper.paper_id for paper in self.newspapers]:
+            self.newspapers.append(new_paper)
+        else :
+            raise ValueError(f"Newspaper with ID {new_paper.paper_id} already exists")
 
     def get_newspaper(self, paper_id: Union[int,str]) -> Optional[Newspaper]:
         for paper in self.newspapers:

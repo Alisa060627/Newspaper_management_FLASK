@@ -1,9 +1,10 @@
 from flask import jsonify
 from flask_restx import Namespace, reqparse, Resource, fields
-
-from ..model.agency import Agency
-from ..model.newspaper import Newspaper
-
+from datetime import datetime
+from src.model.agency import Agency
+from src.model.newspaper import Newspaper
+import random
+import string
 newspaper_ns = Namespace("newspaper", description="Newspaper related operations")
 
 paper_model = newspaper_ns.model('NewspaperModel', {
@@ -25,18 +26,19 @@ class NewspaperAPI(Resource):
     @newspaper_ns.expect(paper_model, validate=True)
     @newspaper_ns.marshal_with(paper_model, envelope='newspaper')
     def post(self):
-        # TODO: this is not smart! you should find a better way to generate a unique ID!
-        paper_id = len(Agency.get_instance().newspapers) + 20
-
+        paper_id = int(datetime.now().strftime("%Y%m%d%H%M%S")+''.join(random.choices(string.digits, k=3)))
         # create a new paper object and add it
-        new_paper = Newspaper(paper_id=paper_id,
+        if newspaper_ns.payload['name'] == "string" or newspaper_ns.payload['frequency'] == 0 or newspaper_ns.payload['price'] <0:
+            return jsonify("Please provide a valid input")
+        else:
+            new_paper = Newspaper(paper_id=paper_id,
                               name=newspaper_ns.payload['name'],
                               frequency=newspaper_ns.payload['frequency'],
                               price=newspaper_ns.payload['price'])
-        Agency.get_instance().add_newspaper(new_paper)
+            Agency.get_instance().add_newspaper(new_paper)
+            # return the new paper
+            return new_paper
 
-        # return the new paper
-        return new_paper
 
     @newspaper_ns.marshal_list_with(paper_model, envelope='newspapers')
     def get(self):
@@ -46,18 +48,23 @@ class NewspaperAPI(Resource):
 @newspaper_ns.route('/<int:paper_id>')
 class NewspaperID(Resource):
 
-    @newspaper_ns.doc(parser=paper_model, description="Get a new newspaper")
+    @newspaper_ns.doc(description="Get a new newspaper")
     @newspaper_ns.marshal_with(paper_model, envelope='newspaper')
     def get(self, paper_id):
         search_result = Agency.get_instance().get_newspaper(paper_id)
         return search_result
 
-    @newspaper_ns.doc(parser=paper_model, description="Update a new newspaper")
+    @newspaper_ns.doc(description="Update a new newspaper")
     @newspaper_ns.expect(paper_model, validate=True)
     @newspaper_ns.marshal_with(paper_model, envelope='newspaper')
     def post(self, paper_id):
-        # TODO: update newspaper
-        pass
+        targeted_paper = Agency.get_instance().get_newspaper(paper_id)
+        if not targeted_paper:
+            return jsonify(f"Newspaper with ID {paper_id} was not found")
+        targeted_paper.price = newspaper_ns.payload["price"]
+        targeted_paper.name = newspaper_ns.payload["name"]
+        targeted_paper.frequency = newspaper_ns.payload["frequency"]
+        return targeted_paper
 
     @newspaper_ns.doc(description="Delete a new newspaper")
     def delete(self, paper_id):
@@ -66,3 +73,5 @@ class NewspaperID(Resource):
             return jsonify(f"Newspaper with ID {paper_id} was not found")
         Agency.get_instance().remove_newspaper(targeted_paper)
         return jsonify(f"Newspaper with ID {paper_id} was removed")
+
+

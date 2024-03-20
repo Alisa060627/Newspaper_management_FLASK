@@ -1,5 +1,6 @@
 from typing import List
 
+from flask import jsonify
 from flask_restx import Model
 
 from .issue import Issue
@@ -13,3 +14,19 @@ class Newspaper(object):
         self.frequency: int = frequency  # the issue frequency (in days)
         self.price: float = price  # the monthly price
         self.issues: List[Issue] = []
+    def all_issues(self) -> List[Issue]:
+        return self.issues
+
+    def add_issue(self, issue: Issue):
+        if issue.id not in [i.id for i in self.issues]:
+            self.issues.append(issue)
+
+        else:
+            raise ValueError(f"Issue with ID {issue.id} already exists")
+    def to_dict(self):
+        return {
+            "paper_id": self.paper_id,
+            "name": self.name,
+            "frequency": self.frequency,
+            "price": self.price
+        }
