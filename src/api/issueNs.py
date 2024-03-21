@@ -1,5 +1,5 @@
 import random
-from flask import jsonify
+from flask import jsonify, Response
 from flask_restx import Namespace, Resource, fields
 from src.model.agency import Agency
 from src.model.issue import Issue
@@ -13,6 +13,12 @@ issue_model = issue_ns.model('NewspaperIssueModel', {
     'released': fields.Boolean(required=True, help='The release status of the issue'),
     'editor_id': fields.Integer(required=True, help='The unique identifier of the editor')
 })
+editor_model = issue_ns.model('NewspaperEditorModel', {
+    'editor_id': fields.Integer(required=True, help='The unique identifier of the editor')
+})
+deliver_model = issue_ns.model('NewspaperDeliverModel', {
+    'subscriber_id': fields.Integer(required=True, help='The unique identifier of the subscriber')
+})
 
 @issue_ns.route('/<int:paper_id>/issue')
 class NewspaperIssue(Resource):
@@ -21,20 +27,20 @@ class NewspaperIssue(Resource):
     def get(self, paper_id):
         targeted_paper = Agency.get_instance().get_newspaper(paper_id)
         if not targeted_paper:
-            return jsonify({"message": f"Newspaper with ID {paper_id} was not found"})
+            return jsonify({"message": f"Newspaper with ID {paper_id} was not found"}),404
         issues = targeted_paper.all_issues()
         issues1 = [issue.to_dict() for issue in issues]
         return issues1
-
 
     @issue_ns.doc(issue_model, description="Add a new issue to a newspaper")
     @issue_ns.expect(issue_model, validate=True)
     @issue_ns.marshal_with(issue_model, envelope='issue')
     def post(self, paper_id):
+
         targeted_paper = Agency.get_instance().get_newspaper(paper_id)
-        if not targeted_paper:
-            return jsonify(f"Newspaper with ID {paper_id} was not found")
-        issue_id = "".join(str(paper_id)[::-3])+''.join(random.choices(string.digits, k=3))
+
+          #  return jsonify(f"Newspaper with ID {paper_id} was not found"), 404
+        issue_id = "".join(str(paper_id)[::-3])+"".join(random.choices(string.digits, k=2))
         issue = Issue(
             releasedate=issue_ns.payload['release_date'],
             released=issue_ns.payload['released'],
@@ -42,6 +48,7 @@ class NewspaperIssue(Resource):
             editor_id=issue_ns.payload['editor_id']
         )
         targeted_paper.add_issue(issue)
+
         return issue.to_dict()
 @issue_ns.route('/<int:paper_id>/issue/<int:issue_id>')
 class NewspaperIssueID(Resource):
@@ -50,10 +57,10 @@ class NewspaperIssueID(Resource):
     def get(self, paper_id, issue_id):
         targeted_paper = Agency.get_instance().get_newspaper(paper_id)
         if not targeted_paper:
-            return jsonify(f"Newspaper with ID {paper_id} was not found")
+            return jsonify(f"Newspaper with ID {paper_id} was not found"),404
         issue = targeted_paper.get_issue(issue_id)
         if not issue:
-            return jsonify(f"Issue with ID {issue_id} was not found")
+            return jsonify(f"Issue with ID {issue_id} was not found"),404
         return issue.to_dict()
 
 
@@ -64,22 +71,37 @@ class NewspaperIssueRelease(Resource):
     def post(self, paper_id, issue_id):
         targeted_paper = Agency.get_instance().get_newspaper(paper_id)
         if not targeted_paper:
-            return jsonify(f"Newspaper with ID {paper_id} was not found")
+            return jsonify(f"Newspaper with ID {paper_id} was not found"),404
         issue = targeted_paper.get_issue(issue_id)
         if not issue:
-            return jsonify(f"Issue with ID {issue_id} was not found")
+            return jsonify(f"Issue with ID {issue_id} was not found"),404
         issue.released = True
         return issue.to_dict()
 @issue_ns.route('/<int:paper_id>/issue/<int:issue_id>/editor')
 class NewspaperIssueEditor(Resource):
     @issue_ns.doc(description="Update the editor of an issue of a newspaper")
+    @issue_ns.expect(editor_model, validate=True)
     @issue_ns.marshal_with(issue_model, envelope='issue')
+    def post(self, paper_id,issue_id):
+        targeted_paper = Agency.get_instance().get_newspaper(paper_id)
+        if not targeted_paper:
+            return jsonify(f"Newspaper with ID {paper_id} was not found"),404
+        issue = targeted_paper.get_issue(issue_id)
+        if not issue:
+            return jsonify(f"Issue with ID {issue_id} was not found"),404
+        issue.set_editor(issue_ns.payload['editor_id'])
+        return issue.to_dict()
+@issue_ns.route('/<int:paper_id>/issue/<int:issue_id>/deliver')
+class NewspaperIssueDeliver(Resource):
+    @issue_ns.doc(description="Deliver an issue of a newspaper")
+    @issue_ns.expect(deliver_model, validate=True)
+
     def post(self, paper_id, issue_id):
         targeted_paper = Agency.get_instance().get_newspaper(paper_id)
         if not targeted_paper:
-            return jsonify(f"Newspaper with ID {paper_id} was not found")
+            return jsonify(f"Newspaper with ID {paper_id} was not found"),404
         issue = targeted_paper.get_issue(issue_id)
         if not issue:
-            return jsonify(f"Issue with ID {issue_id} was not found")
-        issue.set_editor(issue_ns.payload['editor_id'])
-        return issue.to_dict()
+            return jsonify(f"Issue with ID {issue_id} was not found"),404
+        message = issue.deliver(issue_ns.payload['subscriber_id'])
+        return Response(message, status=200, mimetype='text/plain')

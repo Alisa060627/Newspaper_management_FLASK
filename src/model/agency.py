@@ -24,9 +24,10 @@ class Agency(object):
 
     def get_newspaper(self, paper_id: Union[int,str]) -> Optional[Newspaper]:
         for paper in self.newspapers:
-            if paper.paper_id == paper_id:
+            if str(paper.paper_id) == str(paper_id):
                 return paper
-        return None
+
+
 
     def all_newspapers(self) -> List[Newspaper]:
         return self.newspapers

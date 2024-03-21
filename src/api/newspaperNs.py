@@ -26,7 +26,7 @@ class NewspaperAPI(Resource):
     @newspaper_ns.expect(paper_model, validate=True)
     @newspaper_ns.marshal_with(paper_model, envelope='newspaper')
     def post(self):
-        paper_id = int(datetime.now().strftime("%Y%m%d%H%M%S")+''.join(random.choices(string.digits, k=3)))
+        paper_id = int(datetime.now().strftime("%Y%m%d%H%M%S")+''.join(random.choices(string.digits,k = 2)))
         # create a new paper object and add it
         if newspaper_ns.payload['name'] == "string" or newspaper_ns.payload['frequency'] == 0 or newspaper_ns.payload['price'] <0:
             return jsonify("Please provide a valid input")
