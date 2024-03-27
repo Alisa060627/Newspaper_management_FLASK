@@ -109,7 +109,8 @@ class NewspaperIssueDeliver(Resource):
         if not issue:
             return jsonify(f"Issue with ID {issue_id} was not found"),404
         if issue.released:
-            message = issue.deliver(issue_ns.payload['subscriber_id'])
-            return Response(message, status=200, mimetype='text/plain')
+           subscriber = Agency.get_instance().get_subscriber(issue_ns.payload['subscriber_id'])
+           issue.deliver(subscriber)
+           return f"Issue with ID {issue_id} has been delivered to subscriber with ID {issue_ns.payload['subscriber_id']}", 200
         else:
             return jsonify(f"Issue with ID {issue_id} is not released"),404

@@ -1,12 +1,12 @@
-
+from .subscriber import Subscriber
 class Issue(object):
     def __init__(self, releasedate: str, released: bool, id: int, editor_id: int,number_of_pages = int):
         self.id = id
         self.releasedate = releasedate
         self.released: bool = released
         self.editor_id = editor_id
-        self.records = []
         self.number_of_pages = number_of_pages
+        self.records = dict()
     def set_editor(self, editor_id: int):
         self.editor_id = editor_id
 
@@ -18,6 +18,10 @@ class Issue(object):
             "editor_id": self.editor_id,
             "number_of_pages": self.number_of_pages
         }
-    def deliver(self, subscriber_id: int):
-        self.records.append(f"Subscriber with id{subscriber_id}received issue with id {self.id}")
-        return f"Subscriber with id {subscriber_id} received issue with id {self.id}"
+    def deliver(self, subscriber: Subscriber):
+        self.records.update({subscriber.id:self.id})
+        print(self.records)
+    def remove_subscriber(self, subscriber: Subscriber):
+        if subscriber.id in self.records:
+            self.records.pop(subscriber.id)
+        print(self.records)

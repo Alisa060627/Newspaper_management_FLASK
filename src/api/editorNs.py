@@ -19,7 +19,7 @@ class EditorAPI(Resource):
     @editor_ns.marshal_with(editor_model, envelope='editor')
     def post(self):
         part_id = datetime.now().strftime("%Y%m%d%H%M%S")
-        editor_id = int(part_id[:8]+part_id[4:8]+part_id[:4]+"".join(random.choices(string.digits, k=2)))
+        editor_id = int(part_id[:8]+part_id[4:8]+part_id[:4])+random.randint(0, 100)
         # create a new editor object and add it
         if editor_ns.payload['editor_name'] == "string" or editor_ns.payload['address'] == "string":
             return jsonify("Please provide a valid input")
@@ -49,7 +49,6 @@ class EditorID(Resource):
         search_result.address = editor_ns.payload['address']
         return search_result.to_dict()
     @editor_ns.doc(description="Delete an editor")
-    @editor_ns.marshal_with(editor_model, envelope='editor')
     def delete(self, editor_id):
         search_result = Agency.get_instance().get_editor(editor_id)
         Agency.get_instance().remove_editor(search_result)
