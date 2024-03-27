@@ -16,7 +16,7 @@ subscribtion_model = subscriber_ns.model('SubscriberSubscribtionModel', {
     'newspaper_id': fields.Integer(required=True, help='The unique identifier of the newspaper')
 })
 numb_of_issues_model = subscriber_ns.model('SubscriberNumbOfIssuesModel', {
-    'newspaper_id': fields.Integer(required=True, help='The unique identifier of the newspaper'),
+    'paper_id': fields.Integer(required=True, help='The unique identifier of the newspaper'),
     'number_of_issues': fields.Integer(required=True, help='The number of issues of the subscriber')
 })
 stats_model = subscriber_ns.model('SubscriberStats', {
@@ -70,10 +70,11 @@ class SubscriberID(Resource):
 @subscriber_ns.route('/<int:sub_id>/subscribe')
 class SubsriberSubscribe(Resource):
     @subscriber_ns.doc(description="Subscribe to a newspaper")
+    @subscriber_ns.expect(subscribtion_model, validate=True)
     def post(self, sub_id):
         search_result = Agency.get_instance().get_subscriber(sub_id)
         search_result.subscribe(subscriber_ns.payload['newspaper_id'])
-        message = f"Subscriber with ID {sub_id} has subscribed to issue {subscriber_ns.payload['newspaper_id']}"
+        message = f"Subscriber with ID {sub_id} has subscribed to paper with ID {subscriber_ns.payload['newspaper_id']}"
         return Response(message, status=200, mimetype='text/plain')
 @subscriber_ns.route('/<int:sub_id>/missingissues')
 class SubscriberMissingIssues(Resource):

@@ -16,5 +16,7 @@ class Editor(object):
     def all_issues(self):
         issues = []
         for newspaper in self.newspapers:
-            issues += newspaper.all_issues()
+            for issue in newspaper.issues:
+                if issue.editor_id == self.editor_id:
+                    issues.append(issue)
         return issues

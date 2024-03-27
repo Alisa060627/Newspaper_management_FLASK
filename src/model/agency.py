@@ -36,6 +36,12 @@ class Agency(object):
         return self.newspapers
 
     def remove_newspaper(self, paper: Newspaper):
+        for editor in self.editors:
+            if paper in editor.newspapers:
+                editor.newspapers.remove(paper)
+        for subscriber in self.subscribers:
+            if paper.paper_id in subscriber.newspapers:
+                subscriber.newspapers.remove(paper.paper_id)
         self.newspapers.remove(paper)
     def add_editor(self, new_editor: Editor):
         if new_editor.editor_id not in [editor.editor_id for editor in self.editors]:
@@ -57,13 +63,7 @@ class Agency(object):
         # Iterate through newspapers and issues
         for newspaper in editor.newspapers:
             for issue in newspaper.issues:
-                # Determine the new editor for the issue
-                if editor_index > 0:
-                    new_editor = self.editors[editor_index - 1]  # Use the previous editor if available
-                elif len(self.editors) > 1:
-                    new_editor = self.editors[1]  # Use the next editor if available
-                else:
-                    new_editor = None  # Set to None if there are no other editors
+                new_editor = self.editors[editor_index] if editor_index < len(self.editors) else None
 
                 # Update the editor ID of the issue
                 issue.editor_id = new_editor.editor_id if new_editor else None
@@ -112,9 +112,29 @@ class Agency(object):
            list1.append({"paper_id": k, "number_of_issues": v})
          return {
              "number_of_subscriptions": len(subscriber.newspapers),
-             "monthly_cost": sum([newspaper.price if newspaper.paper_id in subscriber.newspapers else 0 for newspaper in self.newspapers]),
-             "annual_cost": sum([newspaper.price if newspaper.paper_id in subscriber.newspapers else 0 for newspaper in self.newspapers])*12,
+             "monthly_cost": sum([newspaper.price*newspaper.frequency if newspaper.paper_id in subscriber.newspapers else 0 for newspaper in self.newspapers]),
+             "annual_cost": sum([newspaper.price*newspaper.frequency if newspaper.paper_id in subscriber.newspapers else 0 for newspaper in self.newspapers])*12,
              "newspapers": list1
          }
+    def get_stats_paper(self, newspaper: Newspaper):
+        # Get the number of subscribers, the monthly and annual revenue
+        num = 0
+        for subscriber in self.subscribers:
+            if newspaper.paper_id in subscriber.newspapers:
+                num = num + 1
+        return {
+            "number_of_subscribers": num,
+            "monthly_revenue": num * newspaper.price*newspaper.frequency,
+            "annual_revenue": num * newspaper.price*newspaper.frequency * 12
+        }
+
+    def deliver(self, subscriber: Subscriber):
+        for newspaper in self.newspapers:
+            if newspaper.paper_id in subscriber.newspapers:
+                for issue in newspaper.issues:
+                    if subscriber.id not in issue.records:
+                        issue.records.update({subscriber.id: newspaper.paper_id})
+                        return issue
+        return None
 
 

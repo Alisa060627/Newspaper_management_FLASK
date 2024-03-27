@@ -17,6 +17,13 @@ paper_model = newspaper_ns.model('NewspaperModel', {
     'price': fields.Float(required=True,
             help='The monthly price of the newspaper (e.g. 12.3)')
    })
+statpaper_model = newspaper_ns.model('NewspaperStatsModel', {
+    'number_of_subscribers': fields.Integer(required=True,
+            help='The number of subscribers of the newspaper'),
+    'monthly_revenue': fields.Float(required=True,
+            help='The monthly revenue of the newspaper'),
+    'annual_revenue': fields.Float(required=True, help='The annual revenue of the newspaper')
+    })
 
 
 @newspaper_ns.route('/')
@@ -73,5 +80,14 @@ class NewspaperID(Resource):
             return jsonify(f"Newspaper with ID {paper_id} was not found")
         Agency.get_instance().remove_newspaper(targeted_paper)
         return jsonify(f"Newspaper with ID {paper_id} was removed")
-
+@newspaper_ns.route('/<int:paper_id>/stats')
+class NewspaperStats(Resource):
+    @newspaper_ns.doc(description="Get statistics of a newspaper")
+    @newspaper_ns.marshal_with(statpaper_model, envelope='newspaper')
+    def get(self, paper_id):
+        targeted_paper = Agency.get_instance().get_newspaper(paper_id)
+        if not targeted_paper:
+            return jsonify(f"Newspaper with ID {paper_id} was not found")
+        stats = Agency.get_instance().get_stats_paper(targeted_paper)
+        return stats
 

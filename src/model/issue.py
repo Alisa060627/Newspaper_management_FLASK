@@ -18,9 +18,7 @@ class Issue(object):
             "editor_id": self.editor_id,
             "number_of_pages": self.number_of_pages
         }
-    def deliver(self, subscriber: Subscriber):
-        self.records.update({subscriber.id:self.id})
-        print(self.records)
+
     def remove_subscriber(self, subscriber: Subscriber):
         if subscriber.id in self.records:
             self.records.pop(subscriber.id)
