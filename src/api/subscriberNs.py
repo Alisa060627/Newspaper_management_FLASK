@@ -40,9 +40,9 @@ class SubscriberAPI(Resource):
             new_subscriber = Subscriber(id=subscriber_id,
                               sub_name = subscriber_ns.payload['sub_name'],
                               address=subscriber_ns.payload['address'])
-            Agency.get_instance().add_subscriber(new_subscriber)
+            new_subscriber1 = Agency.get_instance().add_subscriber(new_subscriber)
             # return the new editor
-            return new_subscriber
+            return new_subscriber1
     @subscriber_ns.marshal_list_with(subscriber_model, envelope='subscriber')
     def get(self):
         return Agency.get_instance().all_subscribers()

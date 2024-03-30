@@ -20,3 +20,4 @@ class Editor(object):
                 if issue.editor_id == self.editor_id:
                     issues.append(issue)
         return issues
+

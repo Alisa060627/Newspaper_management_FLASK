@@ -34,4 +34,4 @@ class Newspaper(object):
         for issue in self.issues:
             if issue.id == issue_id:
                 return issue
-        return None
+        raise ValueError(f"No issue with ID {issue_id} found")

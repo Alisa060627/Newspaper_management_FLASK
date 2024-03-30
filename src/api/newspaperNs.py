@@ -68,9 +68,7 @@ class NewspaperID(Resource):
         targeted_paper = Agency.get_instance().get_newspaper(paper_id)
         if not targeted_paper:
             return jsonify(f"Newspaper with ID {paper_id} was not found")
-        targeted_paper.price = newspaper_ns.payload["price"]
-        targeted_paper.name = newspaper_ns.payload["name"]
-        targeted_paper.frequency = newspaper_ns.payload["frequency"]
+        Agency.get_instance().update_newspaper(targeted_paper, newspaper_ns.payload['name'], newspaper_ns.payload['frequency'], newspaper_ns.payload['price'])
         return targeted_paper.to_dict()
 
     @newspaper_ns.doc(description="Delete a new newspaper")

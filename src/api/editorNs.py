@@ -27,9 +27,9 @@ class EditorAPI(Resource):
             new_editor = Editor(editor_id=editor_id,
                               editor_name = editor_ns.payload['editor_name'],
                               address=editor_ns.payload['address'])
-            Agency.get_instance().add_editor(new_editor)
+            new_editor1 = Agency.get_instance().add_editor(new_editor)
             # return the new editor
-            return new_editor
+            return new_editor1
     @editor_ns.marshal_list_with(editor_model, envelope='editors')
     def get(self):
         return Agency.get_instance().all_editors()

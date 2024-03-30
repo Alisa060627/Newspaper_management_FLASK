@@ -40,8 +40,8 @@ class NewspaperIssue(Resource):
     def post(self, paper_id):
 
         targeted_paper = Agency.get_instance().get_newspaper(paper_id)
-
-          #  return jsonify(f"Newspaper with ID {paper_id} was not found"), 404
+        if not targeted_paper:
+            return jsonify(f"Newspaper with ID {paper_id} was not found"), 404
         issue_id = "".join(str(paper_id)[::-3])+"".join(random.choices(string.digits, k=2))
         issue = Issue(
             releasedate=issue_ns.payload['release_date'],

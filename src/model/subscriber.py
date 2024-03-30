@@ -11,7 +11,10 @@ class Subscriber(object):
             "address": self.address
         }
     def subscribe(self, newspaper_id: int):
-        self.newspapers.append(newspaper_id)
+        if newspaper_id not in self.newspapers:
+            self.newspapers.append(newspaper_id)
+        else:
+            raise ValueError(f"Subscriber already subscribed to newspaper with ID {newspaper_id.paper_id}")
 
 
 
