@@ -92,10 +92,14 @@ class NewspaperIssueEditor(Resource):
         issue = targeted_paper.get_issue(issue_id)
         if not issue:
             return jsonify(f"Issue with ID {issue_id} was not found"),404
-        issue.set_editor(issue_ns.payload['editor_id'])
-        editor = Agency.get_instance().get_editor(issue_ns.payload['editor_id'])
-        editor.add_newspaper(targeted_paper)
-        return issue.to_dict()
+
+        new_editor = Agency.get_instance().get_editor(issue_ns.payload['editor_id'])
+        if not new_editor:
+            return jsonify(f"Editor with ID {issue_ns.payload['editor_id']} was not found"),404
+        else:
+            issue.set_editor(issue_ns.payload['editor_id'])
+            new_editor.add_newspaper(targeted_paper)
+            return issue.to_dict()
 @issue_ns.route('/<int:paper_id>/issue/<int:issue_id>/deliver')
 class NewspaperIssueDeliver(Resource):
     @issue_ns.doc(description="Deliver an issue of a newspaper")

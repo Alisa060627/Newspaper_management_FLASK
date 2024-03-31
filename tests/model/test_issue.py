@@ -7,6 +7,7 @@ def test_set_editor(agency):
     issue.set_editor(editor)
     issue_editor = issue.editor_id
     assert issue_editor.editor_id == editor.editor_id
+
 def test_to_dict(agency):
     issue = agency.newspapers[0].issues[0]
     issue_dict = issue.to_dict()

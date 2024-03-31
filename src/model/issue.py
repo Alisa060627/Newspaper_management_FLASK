@@ -8,7 +8,9 @@ class Issue(object):
         self.number_of_pages = number_of_pages
         self.records = dict()
     def set_editor(self, editor_id: int):
-        self.editor_id = editor_id
+        if editor_id:
+            self.editor_id = editor_id
+
 
     def to_dict(self):
         return {

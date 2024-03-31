@@ -58,9 +58,8 @@ class SubscriberID(Resource):
     @subscriber_ns.marshal_with(subscriber_model, envelope='subscriber')
     def post(self, sub_id):
         search_result = Agency.get_instance().get_subscriber(sub_id)
-        search_result.sub_name = subscriber_ns.payload['sub_name']
-        search_result.address = subscriber_ns.payload['address']
-        return search_result.to_dict()
+        subscriber = Agency.get_instance().update_subscriber(search_result, subscriber_ns.payload['sub_name'], subscriber_ns.payload['address'])
+        return subscriber.to_dict()
     @subscriber_ns.doc(description="Delete a subscriber")
     def delete(self, sub_id):
         search_result = Agency.get_instance().get_subscriber(sub_id)

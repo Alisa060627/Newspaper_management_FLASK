@@ -6,7 +6,7 @@ class Subscriber(object):
         self.address = address
     def to_dict(self):
         return {
-            "sub_id": self.id,
+            "id": self.id,
             "sub_name": self.sub_name,
             "address": self.address
         }

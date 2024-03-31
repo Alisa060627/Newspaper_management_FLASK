@@ -105,7 +105,15 @@ class Agency(object):
             if str(subscriber.id) == str(subscriber_id):
                 return subscriber
         raise ValueError(f"No subscriber with ID {subscriber_id} found")
-
+    def update_subscriber(self, subscriber: Subscriber, new_name: str, new_address: str):
+        subscriber = self.get_subscriber(subscriber.id)
+        if subscriber not in self.subscribers:
+            raise ValueError(f"No subscriber with ID {subscriber.id} found")
+        else:
+            subscriber.id = subscriber.id
+            subscriber.sub_name = new_name
+            subscriber.address = new_address
+            return subscriber
     def remove_subscriber(self, subscriber: Subscriber):
         if subscriber not in self.subscribers:
             raise ValueError(f"No subscriber with ID {subscriber.id} found")
@@ -125,15 +133,13 @@ class Agency(object):
     def get_stats(self, subscriber: Subscriber):
        # Get the number of newspaper subscriptions and the monthly and annual cost and as well as the number of issues that the subscriber received for each newspaper
          numb = dict()
-         for newspaper in self.newspapers:
-             for issue in newspaper.issues:
-                 if subscriber.id in issue.records:
-                    if newspaper.paper_id in numb:
-                        numb[newspaper.paper_id] += 1
-                    else:
-                        numb[newspaper.paper_id] = 1
-                 if newspaper.paper_id in subscriber.newspapers and subscriber.id not in issue.records:
-                     numb[newspaper.paper_id] = 0
+         for newspaper in subscriber.newspapers:
+                paper=self.get_newspaper(newspaper)
+                num = 0
+                for issue in paper.issues:
+                    if subscriber.id in issue.records:
+                        num = num + 1
+                numb[paper.paper_id] = num
          list1 = []
          for k, v in numb.items():
            list1.append({"paper_id": k, "number_of_issues": v})
@@ -162,6 +168,8 @@ class Agency(object):
                     if subscriber.id not in issue.records:
                         issue.records.update({subscriber.id: newspaper.paper_id})
                         return issue
-        return None
+                    else:
+                        raise ValueError(f"Subscriber with ID {subscriber.id} already received the issue with ID {issue.id}")
+
 
 
