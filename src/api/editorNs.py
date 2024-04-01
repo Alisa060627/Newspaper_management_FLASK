@@ -21,15 +21,16 @@ class EditorAPI(Resource):
         part_id = datetime.now().strftime("%Y%m%d%H%M%S")
         editor_id = int(part_id[:8]+part_id[4:8]+part_id[:4])+random.randint(0, 100)
         # create a new editor object and add it
-        if editor_ns.payload['editor_name'] == "string" or editor_ns.payload['address'] == "string":
-            return jsonify("Please provide a valid input")
-        else:
+        try:
             new_editor = Editor(editor_id=editor_id,
                               editor_name = editor_ns.payload['editor_name'],
                               address=editor_ns.payload['address'])
             new_editor1 = Agency.get_instance().add_editor(new_editor)
             # return the new editor
             return new_editor1
+        except ValueError as e:
+            response = {"error": str(e)}
+            return response, 400
     @editor_ns.marshal_list_with(editor_model, envelope='editors')
     def get(self):
         return Agency.get_instance().all_editors()
@@ -38,30 +39,41 @@ class EditorID(Resource):
     @editor_ns.doc(description="Get an editor")
     @editor_ns.marshal_with(editor_model, envelope='editor')
     def get(self, editor_id):
-        search_result = Agency.get_instance().get_editor(editor_id)
-        return search_result.to_dict()
+        try:
+            search_result = Agency.get_instance().get_editor(editor_id)
+            return search_result.to_dict()
+        except ValueError as e:
+            response = {"error": str(e)}
+            return response, 404
     @editor_ns.doc(description="Update an editor")
     @editor_ns.expect(editor_model, validate=True)
     @editor_ns.marshal_with(editor_model, envelope='editor')
     def post(self, editor_id):
-        search_result = Agency.get_instance().get_editor(editor_id)
-        search_result.editor_name = editor_ns.payload['editor_name']
-        search_result.address = editor_ns.payload['address']
-        return search_result.to_dict()
+        try:
+            updated_editor = Agency.get_instance().update_editor(editor_id, editor_ns.payload['editor_name'], editor_ns.payload['address'])
+            return updated_editor
+        except ValueError as e:
+            response = {"error": str(e)}
+            return response, 404
     @editor_ns.doc(description="Delete an editor")
     def delete(self, editor_id):
-        search_result = Agency.get_instance().get_editor(editor_id)
-        Agency.get_instance().remove_editor(search_result)
-        message = f"Editor with ID {editor_id} has been deleted"
-        return Response(message, status=200, mimetype='text/plain')
+        try:
+            Agency.get_instance().remove_editor(editor_id)
+            message = f"Editor with ID {editor_id} has been deleted"
+            return jsonify(message)
+        except ValueError as e:
+            response = {"error": str(e)}
+            return response, 404
 @editor_ns.route('/<int:editor_id>/issues')
 class EditorIssue(Resource):
     @editor_ns.doc(description="All issues of an editor")
     @editor_ns.marshal_list_with(issue_model, envelope='issues')
     def get(self, editor_id):
-        targeted_editor = Agency.get_instance().get_editor(editor_id)
-        if not targeted_editor:
-            return jsonify({"message": f"Editor with ID {editor_id} was not found"}),404
-        issues = targeted_editor.all_issues()
-        issues1 = [issue.to_dict() for issue in issues]
-        return issues1
+        try:
+            targeted_editor = Agency.get_instance().get_editor(editor_id)
+            issues = targeted_editor.all_issues()
+            issues1 = [issue.to_dict() for issue in issues]
+            return issues1
+        except ValueError as e:
+            response = {"error": str(e)}
+            return response, 404

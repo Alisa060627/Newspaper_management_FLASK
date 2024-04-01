@@ -20,7 +20,8 @@ def test_add_issue_same_id_should_raise_error(agency):
                         editor_id=agency.editors[0].editor_id,
                         number_of_pages=10)
     newspaper.add_issue(new_issue)
-    assert len(newspaper.issues) == before + 1
+    with pytest.raises(ValueError, math = f"Issue with ID {new_issue.id} already exists"):
+        newspaper.add_issue(new_issue)
 def test_get_all_issues(agency):
     newspaper = agency.newspapers[0]
     assert len(newspaper.all_issues()) == len(newspaper.issues)
@@ -30,7 +31,9 @@ def test_get_issue(agency):
     assert newspaper.get_issue(issue.id) == issue
 def test_get_issue_not_found(agency):
     newspaper = agency.newspapers[0]
-    assert newspaper.get_issue(99909)
+    issue_id = 9
+    with pytest.raises(AttributeError, match = f"No issue with ID {issue_id} found"):
+        newspaper.get_issue(issue_id)
 def test_to_dict(agency):
     newspaper = agency.newspapers[0]
     newspaper_dict = newspaper.to_dict()

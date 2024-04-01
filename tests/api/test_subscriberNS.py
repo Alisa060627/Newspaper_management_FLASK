@@ -58,11 +58,11 @@ def test_missing_issues(client, agency):
     response = client.get(f"/subscriber/{subscriber.id}/missingissues")
     assert response.status_code == 200
     parsed = response.get_json()
-    assert len(parsed["issues"]) == len(agency.missing_issues(subscriber))
+    assert len(parsed["issues"]) == len(agency.missing_issues(subscriber.id))
 def test_subscriber_stats(client, agency):
     paper = agency.newspapers[0]
     subscriber = agency.subscribers[1]
-    subscriber.subscribe(paper.paper_id)
+    agency.subscribe(subscriber.id,paper.paper_id)
     response = client.get(f"/subscriber/{subscriber.id}/stats")
     assert response.status_code == 200
     parsed = response.get_json()

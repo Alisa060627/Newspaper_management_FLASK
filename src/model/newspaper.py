@@ -20,7 +20,6 @@ class Newspaper(object):
     def add_issue(self, issue: Issue):
         if issue.id not in [i.id for i in self.issues]:
             self.issues.append(issue)
-
         else:
             raise ValueError(f"Issue with ID {issue.id} already exists")
     def to_dict(self):

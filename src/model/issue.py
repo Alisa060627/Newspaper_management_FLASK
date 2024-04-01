@@ -24,4 +24,3 @@ class Issue(object):
     def remove_subscriber(self, subscriber: Subscriber):
         if subscriber.id in self.records:
             self.records.pop(subscriber.id)
-        print(self.records)

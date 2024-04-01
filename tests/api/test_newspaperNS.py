@@ -90,7 +90,8 @@ def test_newspaper_stats(client, agency):
     # prepare
     paper = agency.newspapers[0]
     subscriber = agency.subscribers[0]
-    subscriber.subscribe(paper.paper_id)
+    issue = paper.issues[0]
+    agency.subscribe(subscriber.id,paper.paper_id)
     # act
     response = client.get(f"/newspaper/{paper.paper_id}/stats")
 

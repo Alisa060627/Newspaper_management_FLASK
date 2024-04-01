@@ -76,9 +76,9 @@ def test_issue_set_editor(client, agency):
 def test_issue_deliver(client, agency):
     # prepare
     paper = agency.newspapers[0]
-    issue = paper.issues[0]
     subscriber = agency.subscribers[0]
-    subscriber.subscribe(paper.paper_id)
+    issue = paper.issues[0]
+    agency.subscribe(subscriber.id,paper.paper_id)
     # act
     response = client.post(f"/newspaper/{paper.paper_id}/issue/{issue.id}/deliver", json={"subscriber_id": subscriber.id})
     assert response.status_code == 200
