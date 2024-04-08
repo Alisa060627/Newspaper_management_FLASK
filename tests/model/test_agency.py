@@ -205,11 +205,16 @@ def test_remove_subscriber_not_found(agency):
 def test_missing_issues(agency):
     subscriber = agency.subscribers[0]
     missing_issues = []
+    missing_issues1 = []
+
     for newspaper in agency.newspapers:
         for issue in newspaper.issues:
-            if subscriber.id not in issue.records:
-                missing_issues.append(issue)
-    assert len(agency.missing_issues(subscriber.id)) == len(missing_issues)
+            if subscriber.id not in issue.records and issue.id not in missing_issues:
+                missing_issues.append(issue.id)
+    print(missing_issues)
+    for issue in agency.missing_issues(subscriber.id):
+        missing_issues1.append(issue["missing_issues"][0])
+    assert len(missing_issues1) == len(missing_issues)
 def test_missing_issues_not_found(agency):
     with pytest.raises(AttributeError, match=f'No subscriber with ID 9999 found'):
         agency.missing_issues(9999)

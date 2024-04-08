@@ -150,15 +150,26 @@ class Agency(object):
             self.subscribers.remove(subscriber)
     def missing_issues(self, sub_id) -> List[Issue]:
         subscriber = self.get_subscriber(sub_id)
+
         if subscriber not in self.subscribers:
             raise ValueError(f"No subscriber with ID {subscriber.id} found")
         else:
+            diction = dict()
             missing_issues = []
+            list1 = []
             for newspaper in self.newspapers:
                 for issue in newspaper.issues:
                     if subscriber.id not in issue.records:
-                        missing_issues.append(issue)
-            return missing_issues
+                        if newspaper.paper_id in diction:
+                            diction[newspaper.paper_id].append(issue.to_dict())
+                        else:
+                            diction[newspaper.paper_id] = [issue.to_dict()]
+
+
+
+            for k, v in diction.items():
+                list1.append({"newspaper_id": k, "missing_issues": v})
+            return list1
 
     def get_stats(self, sub_id: Union[int,str]):
          subscriber = self.get_subscriber(sub_id)
@@ -215,16 +226,15 @@ class Agency(object):
         else:
             for newspaper in self.newspapers:
                 if newspaper.paper_id in subscriber.newspapers:
-                    for issue in newspaper.issues:
-                        if subscriber.id not in issue.records:
-                            if issue.released:
-                                issue.records.update({subscriber.id: newspaper.paper_id})
-                                return issue
-                            else:
-                                raise ValueError(f"Issue with ID {issue.id} has not been released yet")
+                    if subscriber.id not in issue.records:
+                        if issue.released:
+                            issue.records.update({subscriber.id: newspaper.paper_id})
+                            return issue
                         else:
-                            raise ValueError(
-                                f"Subscriber with ID {subscriber.id} already received the issue with ID {issue.id}")
+                             raise ValueError(f"Issue with ID {issue.id} has not been released yet")
+                    else:
+                        raise ValueError(
+                            f"Subscriber with ID {subscriber.id} already received the issue with ID {issue.id}")
                 else:
                     raise ValueError(f"Subscriber with ID {subscriber.id} is not subscribed to newspaper with ID {newspaper_id}")
 

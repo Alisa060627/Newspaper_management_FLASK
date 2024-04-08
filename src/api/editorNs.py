@@ -1,5 +1,5 @@
 import random
-from flask import jsonify, Response
+from flask import jsonify, Response,abort
 from flask_restx import Namespace, Resource, fields
 from src.model.agency import Agency
 from src.model.editor import Editor
@@ -29,8 +29,7 @@ class EditorAPI(Resource):
             # return the new editor
             return new_editor1
         except ValueError as e:
-            response = {"error": str(e)}
-            return response, 400
+            abort(400, str(e))
     @editor_ns.marshal_list_with(editor_model, envelope='editors')
     def get(self):
         return Agency.get_instance().all_editors()
@@ -43,8 +42,7 @@ class EditorID(Resource):
             search_result = Agency.get_instance().get_editor(editor_id)
             return search_result.to_dict()
         except ValueError as e:
-            response = {"error": str(e)}
-            return response, 404
+            abort(404, str(e))
     @editor_ns.doc(description="Update an editor")
     @editor_ns.expect(editor_model, validate=True)
     @editor_ns.marshal_with(editor_model, envelope='editor')
@@ -53,8 +51,7 @@ class EditorID(Resource):
             updated_editor = Agency.get_instance().update_editor(editor_id, editor_ns.payload['editor_name'], editor_ns.payload['address'])
             return updated_editor
         except ValueError as e:
-            response = {"error": str(e)}
-            return response, 404
+            abort(404, str(e))
     @editor_ns.doc(description="Delete an editor")
     def delete(self, editor_id):
         try:
@@ -62,8 +59,7 @@ class EditorID(Resource):
             message = f"Editor with ID {editor_id} has been deleted"
             return jsonify(message)
         except ValueError as e:
-            response = {"error": str(e)}
-            return response, 404
+            abort(404, str(e))
 @editor_ns.route('/<int:editor_id>/issues')
 class EditorIssue(Resource):
     @editor_ns.doc(description="All issues of an editor")
@@ -75,5 +71,4 @@ class EditorIssue(Resource):
             issues1 = [issue.to_dict() for issue in issues]
             return issues1
         except ValueError as e:
-            response = {"error": str(e)}
-            return response, 404
+            abort(404, str(e))

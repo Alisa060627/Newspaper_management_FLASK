@@ -1,5 +1,5 @@
 import random
-from flask import jsonify, Response
+from flask import jsonify, Response, abort
 from flask_restx import Namespace, Resource, fields
 from src.model.agency import Agency
 from src.model.issue import Issue
@@ -33,8 +33,7 @@ class NewspaperIssue(Resource):
             issues1 = [issue.to_dict() for issue in issues]
             return issues1
         except ValueError as e:
-            response = {"error": str(e)}
-            return response, 404
+            abort(404, str(e))
 
     @issue_ns.doc(issue_model, description="Add a new issue to a newspaper")
     @issue_ns.expect(issue_model, validate=True)
@@ -54,8 +53,7 @@ class NewspaperIssue(Resource):
 
             return issue.to_dict()
         except ValueError as e:
-            response = {"error": str(e)}
-            return response, 404
+            abort(404, str(e))
 @issue_ns.route('/<int:paper_id>/issue/<int:issue_id>')
 class NewspaperIssueID(Resource):
     @issue_ns.doc(description="Get an issue of a newspaper")
@@ -66,8 +64,7 @@ class NewspaperIssueID(Resource):
             issue = targeted_paper.get_issue(issue_id)
             return issue.to_dict()
         except ValueError as e:
-            response = {"error": str(e)}
-            return response, 404
+            abort(404, str(e))
 
 
 @issue_ns.route('/<int:paper_id>/issue/<int:issue_id>/release')
@@ -81,8 +78,7 @@ class NewspaperIssueRelease(Resource):
             issue.released = True
             return issue.to_dict()
         except ValueError as e:
-            response = {"error": str(e)}
-            return response, 404
+            abort(404, str(e))
 @issue_ns.route('/<int:paper_id>/issue/<int:issue_id>/editor')
 class NewspaperIssueEditor(Resource):
     @issue_ns.doc(description="Update the editor of an issue of a newspaper")
@@ -97,8 +93,7 @@ class NewspaperIssueEditor(Resource):
             new_editor.add_newspaper(targeted_paper)
             return issue.to_dict()
         except ValueError as e:
-            response = {"error": str(e)}
-            return response, 404
+            abort(404, str(e))
 @issue_ns.route('/<int:paper_id>/issue/<int:issue_id>/deliver')
 class NewspaperIssueDeliver(Resource):
     @issue_ns.doc(description="Deliver an issue of a newspaper")
@@ -109,5 +104,4 @@ class NewspaperIssueDeliver(Resource):
            Agency.get_instance().deliver(issue_ns.payload['subscriber_id'], issue_id,paper_id)
            return (f"Issue with ID {issue_id} has been delivered to subscriber with ID {issue_ns.payload['subscriber_id']}")
         except ValueError as e:
-            response = {"error": str(e)}
-            return response, 404
+            abort(404, str(e))

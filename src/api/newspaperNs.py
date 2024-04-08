@@ -1,4 +1,4 @@
-from flask import jsonify
+from flask import jsonify, abort
 from flask_restx import Namespace, reqparse, Resource, fields
 from datetime import datetime
 from src.model.agency import Agency
@@ -43,8 +43,7 @@ class NewspaperAPI(Resource):
             # return the new paper
             return new_paper1.to_dict()
         except ValueError as e:
-            response = {"error": str(e)}
-            return response, 400
+            abort(404, str(e))
 
 
     @newspaper_ns.marshal_list_with(paper_model, envelope='newspapers')
@@ -62,8 +61,7 @@ class NewspaperID(Resource):
             search_result = Agency.get_instance().get_newspaper(paper_id)
             return search_result.to_dict()
         except ValueError as e:
-            response = {"error": str(e)}
-            return response, 404
+            abort(404, str(e))
 
     @newspaper_ns.doc(description="Update a new newspaper")
     @newspaper_ns.expect(paper_model, validate=True)
@@ -73,8 +71,7 @@ class NewspaperID(Resource):
             targeted_paper = Agency.get_instance().update_newspaper(paper_id, newspaper_ns.payload['name'], newspaper_ns.payload['frequency'], newspaper_ns.payload['price'])
             return targeted_paper.to_dict()
         except ValueError as e:
-            response = {"error": str(e)}
-            return response, 404
+            abort(404, str(e))
 
 
     @newspaper_ns.doc(description="Delete a new newspaper")
@@ -83,8 +80,7 @@ class NewspaperID(Resource):
             Agency.get_instance().remove_newspaper(paper_id)
             return jsonify(f"Newspaper with ID {paper_id} was removed")
         except ValueError as e:
-            response = {"error": str(e)}
-            return response, 404
+            abort(404, str(e))
 @newspaper_ns.route('/<int:paper_id>/stats')
 class NewspaperStats(Resource):
     @newspaper_ns.doc(description="Get statistics of a newspaper")
@@ -94,6 +90,5 @@ class NewspaperStats(Resource):
             stats = Agency.get_instance().get_stats_paper(paper_id)
             return stats
         except ValueError as e:
-            response = {"error": str(e)}
-            return response, 404
+            abort(404, str(e))
 

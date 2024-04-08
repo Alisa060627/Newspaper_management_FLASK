@@ -1,5 +1,5 @@
 import random
-from flask import jsonify, Response
+from flask import jsonify, Response, abort
 from flask_restx import Namespace, Resource, fields
 from src.model.agency import Agency
 from src.model.subscriber import Subscriber
@@ -25,6 +25,10 @@ stats_model = subscriber_ns.model('SubscriberStats', {
     'annual_cost': fields.Float(required=True, help='The annual cost of the subscriber'),
     'newspapers': fields.List(fields.Nested(numb_of_issues_model), required=True, help='The list of newspapers that the subscriber is subscribed to')
 })
+missing_model = subscriber_ns.model('SubscriberMissingIssues', {
+    'newspaper_id': fields.Integer(required=True, help='The unique identifier of the newspaper'),
+    'missing_issues': fields.List(fields.Nested(issue_model),required=True, help='The number of missing issues of the subscriber')
+})
 @subscriber_ns.route('/')
 class SubscriberAPI(Resource):
     @subscriber_ns.doc(subscriber_model, description="Add a new subscriber")
@@ -42,8 +46,7 @@ class SubscriberAPI(Resource):
             # return the new editor
             return new_subscriber1
         except ValueError as e:
-            response = {"error": str(e)}
-            return response, 400
+            abort(400, str(e))
     @subscriber_ns.marshal_list_with(subscriber_model, envelope='subscriber')
     def get(self):
         return Agency.get_instance().all_subscribers()
@@ -56,8 +59,7 @@ class SubscriberID(Resource):
             search_result = Agency.get_instance().get_subscriber(sub_id)
             return search_result.to_dict()
         except ValueError as e:
-            response = {"error": str(e)}
-            return response, 404
+            abort(404, str(e))
     @subscriber_ns.doc(description="Update a subscriber")
     @subscriber_ns.expect(subscriber_model, validate=True)
     @subscriber_ns.marshal_with(subscriber_model, envelope='subscriber')
@@ -68,8 +70,7 @@ class SubscriberID(Resource):
                                                                  subscriber_ns.payload['address'])
             return subscriber.to_dict()
         except ValueError as e:
-            response = {"error": str(e)}
-            return response, 404
+            abort(404, str(e))
     @subscriber_ns.doc(description="Delete a subscriber")
     def delete(self, sub_id):
         try:
@@ -77,8 +78,7 @@ class SubscriberID(Resource):
             message = f"Subscriber with ID {sub_id} has been deleted"
             return jsonify(message)
         except ValueError as e:
-            response = {"error": str(e)}
-            return response, 404
+            abort(404, str(e))
 @subscriber_ns.route('/<int:sub_id>/subscribe')
 class SubsriberSubscribe(Resource):
     @subscriber_ns.doc(description="Subscribe to a newspaper")
@@ -89,20 +89,18 @@ class SubsriberSubscribe(Resource):
             message = f"Subscriber with ID {sub_id} has subscribed to paper with ID {subscriber_ns.payload['newspaper_id']}"
             return jsonify(message)
         except ValueError as e:
-            response = {"error": str(e)}
-            return response, 404
+            abort(404, str(e))
 @subscriber_ns.route('/<int:sub_id>/missingissues')
 class SubscriberMissingIssues(Resource):
     @subscriber_ns.doc(description="Get all missing issues of a subscriber")
-    @subscriber_ns.marshal_list_with(issue_model, envelope='issues')
+    @subscriber_ns.marshal_list_with(missing_model, envelope='issues')
     def get(self, sub_id):
         try:
             missing_issues = Agency.get_instance().missing_issues(sub_id)
-            missing_issues = [issue.to_dict() for issue in missing_issues]
+            #missing_issues = [issue.to_dict() for issue in missing_issues]
             return missing_issues
         except ValueError as e:
-            response = {"error": str(e)}
-            return response, 404
+            abort(404, str(e))
 @subscriber_ns.route('/<int:sub_id>/stats')
 class SubscriberStats(Resource):
     @subscriber_ns.doc(description="Get statistics of a subscriber")
@@ -112,5 +110,4 @@ class SubscriberStats(Resource):
             stats = Agency.get_instance().get_stats(sub_id)
             return stats
         except ValueError as e:
-            response = {"error": str(e)}
-            return response, 404
+            abort(404, str(e))
