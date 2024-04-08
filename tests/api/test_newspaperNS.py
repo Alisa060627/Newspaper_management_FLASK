@@ -37,7 +37,7 @@ def test_add_newspaper(client, agency):
     assert paper_response["frequency"] == 7
     assert paper_response["price"] == 3.14
 def test_get_newspaper_by_id(client, agency):
-    # prepare
+
     paper = agency.newspapers[0]
 
     # act
@@ -87,20 +87,16 @@ def test_delete_newspaper(client, agency):
     assert response.status_code == 200
     assert len(agency.newspapers) == paper_count_before - 1
 def test_newspaper_stats(client, agency):
-    # prepare
     paper = agency.newspapers[0]
     subscriber = agency.subscribers[0]
-    issue = paper.issues[0]
+
     agency.subscribe(subscriber.id,paper.paper_id)
-    # act
     response = client.get(f"/newspaper/{paper.paper_id}/stats")
 
-    # verify
     assert response.status_code == 200
     parsed = response.get_json()
     stats = parsed["newspaper"]
 
-    # verify that the response contains the newspaper data
     assert stats["number_of_subscribers"] == 1
     assert stats["monthly_revenue"] == paper.price * paper.frequency*1
     assert stats["annual_revenue"] == paper.price * paper.frequency*1*12
