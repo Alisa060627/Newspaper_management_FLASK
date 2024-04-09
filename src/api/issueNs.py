@@ -98,8 +98,7 @@ class NewspaperIssueEditor(Resource):
             targeted_paper = Agency.get_instance().get_newspaper(paper_id)
             issue = targeted_paper.get_issue(issue_id)
             new_editor = Agency.get_instance().get_editor(issue_ns.payload['editor_id'])
-            issue.set_editor(issue_ns.payload['editor_id'])
-            new_editor.add_newspaper(targeted_paper)
+            issue.set_editor(new_editor.editor_id)
             return issue.to_dict()
         except ValueError as e:
             abort(404, str(e))
@@ -107,7 +106,6 @@ class NewspaperIssueEditor(Resource):
 class NewspaperIssueDeliver(Resource):
     @issue_ns.doc(description="Deliver an issue of a newspaper")
     @issue_ns.expect(deliver_model, validate=True)
-
     def post(self, paper_id, issue_id):
         try:
            Agency.get_instance().deliver(issue_ns.payload['subscriber_id'], issue_id,paper_id)

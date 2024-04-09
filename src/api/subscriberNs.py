@@ -29,6 +29,10 @@ missing_model = subscriber_ns.model('SubscriberMissingIssues', {
     'newspaper_id': fields.Integer(required=True, help='The unique identifier of the newspaper'),
     'missing_issues': fields.List(fields.Nested(issue_model),required=True, help='The number of missing issues of the subscriber')
 })
+subscribeissue_model = subscriber_ns.model('SubscriberSubscribeIssueModel', {
+    'newspaper_id': fields.Integer(required=True, help='The unique identifier of the newspaper'),
+    'issue_id': fields.Integer(required=True, help='The unique identifier of the issue')
+})
 @subscriber_ns.route('/')
 class SubscriberAPI(Resource):
     @subscriber_ns.doc(subscriber_model, description="Add a new subscriber")
@@ -90,6 +94,17 @@ class SubsriberSubscribe(Resource):
             return jsonify(message)
         except ValueError as e:
             abort(404, str(e))
+@subscriber_ns.route('/<int:sub_id>/subscribeissue')
+class SubscriberIssue(Resource):
+    @subscriber_ns.doc(description="Subscribe to an issue")
+    @subscriber_ns.expect(subscribeissue_model, validate=True)
+    def post(self, sub_id):
+        try:
+            Agency.get_instance().subscribe_to_issue(sub_id, subscriber_ns.payload['newspaper_id'], subscriber_ns.payload['issue_id'])
+            message = f"Subscriber with ID {sub_id} has subscribed to issue with ID {subscriber_ns.payload['issue_id']}"
+            return jsonify(message)
+        except ValueError as e:
+            abort(404, str(e))
 @subscriber_ns.route('/<int:sub_id>/missingissues')
 class SubscriberMissingIssues(Resource):
     @subscriber_ns.doc(description="Get all missing issues of a subscriber")
@@ -111,3 +126,4 @@ class SubscriberStats(Resource):
             return stats
         except ValueError as e:
             abort(404, str(e))
+

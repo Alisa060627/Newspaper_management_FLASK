@@ -136,16 +136,19 @@ def test_update_editor(agency):
     editor = agency.editors[0]
     new_name = "Updated Name"
     new_address = "Updated Address"
-    updated_editor = agency.update_editor(editor.editor_id, new_name, new_address)
+    newspaper = agency.newspapers[0]
+    updated_editor = agency.update_editor(editor.editor_id, new_name, new_address, newspaper)
     assert updated_editor.editor_name == new_name
     assert updated_editor.address == new_address
 def test_update_editor_not_found(agency):
+    newpaper = agency.newspapers[0]
     with pytest.raises(ValueError, match=f'No editor with ID {agency.get_editor(9999).editor_id} found'):
-        agency.update_editor(agency.editors[agency.get_editor(9999)], "New Name", "New Address")
+        agency.update_editor(agency.editors[agency.get_editor(9999)], "New Name", "New Address", newpaper)
 def test_update_editor_missing_info_should_raise_error(agency):
     editor = agency.editors[0]
+    newspaper = agency.newspapers[0]
     with pytest.raises(AttributeError, match=f'Editor has missing information'):
-        agency.update_editor(editor.editor_id, "", "")
+        agency.update_editor(editor.editor_id, "", "", newspaper)
 def test_add_subscriber(agency):
     before = len(agency.subscribers)
     new_subscriber = Subscriber(id=999,

@@ -42,5 +42,6 @@ class Newspaper(object):
     def get_issue(self, issue_id: int) -> Issue:
         for issue in self.issues:
             if issue.id == issue_id:
+
                 return issue
         raise ValueError(f"No issue with ID {issue_id} found")

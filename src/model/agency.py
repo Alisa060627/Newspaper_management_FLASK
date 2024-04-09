@@ -72,13 +72,13 @@ class Agency(object):
             self.editors.append(new_editor)
             return new_editor
     def all_editors(self) -> List[Editor]:
-        return self.editors
+        return [editor.to_dict() for editor in self.editors]
     def get_editor(self, editor_id: Union[int,str]) -> Optional[Editor]:
         for editor in self.editors:
             if str(editor.editor_id) == str(editor_id):
                 return editor
         raise ValueError(f"No editor with ID {editor_id} found")
-    def update_editor(self, editor_id, new_name: str, new_address: str):
+    def update_editor(self, editor_id, new_name: str, new_address: str, newspapers: List[Newspaper]):
         editor = self.get_editor(editor_id)
         if editor not in self.editors:
             raise ValueError(f"No editor with ID {editor_id} found")
@@ -87,24 +87,28 @@ class Agency(object):
         else:
             editor.editor_name = new_name
             editor.address = new_address
+            editor.newspapers = newspapers
+            for newspaper in self.newspapers:
+                for issue in newspaper.issues:
+                    if issue.editor_id == editor_id and newspaper not in editor.newspapers:
+                        issue.editor_id = 0
             return editor
     def remove_editor(self, editor_id: Union[int,str]):
         editor = self.get_editor(editor_id)
         if editor not in self.editors:
             raise ValueError(f"No editor with ID {editor.editor_id} found")
         else:
-            editor_index = self.editors.index(editor)
-
-            # Remove the editor from the list of editors
             self.editors.remove(editor)
-
-            # Iterate through newspapers and issues
+            list1 = []
             for newspaper in editor.newspapers:
                 for issue in newspaper.issues:
-                    new_editor = self.editors[editor_index] if editor_index < len(self.editors) else None
+                    for editor in self.editors:
+                        if newspaper in editor.newspapers:
+                            list1.append(editor)
+                    new_editor = list1[0] if list1 else None
 
                     # Update the editor ID of the issue
-                    issue.editor_id = new_editor.editor_id if new_editor else None
+                    issue.editor_id = new_editor.editor_id if new_editor else 0
 
                     # Add the newspaper to the new editor if available
                     if new_editor:
@@ -146,7 +150,9 @@ class Agency(object):
             for newspaper in self.newspapers:
                 for issue in newspaper.issues:
                     if subscriber.id in issue.records:
-                        issue.remove_subscriber(subscriber)
+                        issue.records.pop(subscriber.id)
+                    if subscriber.id in issue.subscribers:
+                        issue.subscribers.remove(subscriber.id)
             self.subscribers.remove(subscriber)
     def missing_issues(self, sub_id) -> List[Issue]:
         subscriber = self.get_subscriber(sub_id)
@@ -222,23 +228,25 @@ class Agency(object):
             raise ValueError(f"No newspaper with ID {newspaper_id} found")
         issue = newspaper.get_issue(issue_id)
         if issue not in newspaper.issues:
-            raise ValueError(f"No issue with ID {issue_id} found")
+            raise ValueError(f"No issue with ID {issue_id} of newspaper with ID {newspaper.paper_id} found")
         else:
             for newspaper in self.newspapers:
                 if newspaper.paper_id in subscriber.newspapers:
-                    if subscriber.id not in issue.records:
-                        if issue.released:
-                            issue.records.update({subscriber.id: newspaper.paper_id})
-                            return issue
+                    if subscriber.id in issue.subscribers:
+                        if subscriber.id not in issue.records:
+                            if issue.released:
+                                issue.records.update({subscriber.id: newspaper.paper_id})
+                                return issue
+                            else:
+                                raise ValueError(f"Issue with ID {issue.id} has not been released yet")
                         else:
-                             raise ValueError(f"Issue with ID {issue.id} has not been released yet")
+                            raise ValueError(f"Subscriber with ID {subscriber.id} already received the issue with ID {issue.id}")
                     else:
-                        raise ValueError(
-                            f"Subscriber with ID {subscriber.id} already received the issue with ID {issue.id}")
+                        raise ValueError(f"Subscriber with ID {subscriber.id} is not subscribed to issue with ID {issue.id}")
                 else:
-                    raise ValueError(f"Subscriber with ID {subscriber.id} is not subscribed to newspaper with ID {newspaper_id}")
+                    raise ValueError(f"Subscriber with ID {subscriber.id} is not subscribed to newspaper with ID {newspaper.paper_id}")
 
-    def subscribe(self,subscriber_id, newspaper_id: int):
+    def subscribe(self,subscriber_id, newspaper_id: int):#subscribe to newspaper
         subscriber = self.get_subscriber(subscriber_id)
         newspaper = self.get_newspaper(newspaper_id)
         if subscriber not in self.subscribers:
@@ -250,6 +258,24 @@ class Agency(object):
         else:
             subscriber.newspapers.append(newspaper_id)
             return subscriber
+    def subscribe_to_issue(self, sub_id, newspaper_id: int, issue_id: int):
+        subscriber = self.get_subscriber(sub_id)
+        if subscriber not in self.subscribers:
+            raise ValueError(f"No subscriber with ID {subscriber.id} found")
+        newspaper = self.get_newspaper(newspaper_id)
+        if newspaper not in self.newspapers:
+            raise ValueError(f"No newspaper with ID {newspaper_id} found")
+        issue = newspaper.get_issue(issue_id)
+        if issue not in newspaper.issues:
+            raise ValueError(f"No issue with ID {issue_id} of newspaper with ID {newspaper.paper_id} found")
+        if newspaper_id not in subscriber.newspapers:
+            raise ValueError(f"Subscriber with ID {subscriber.id} is not subscribed to newspaper with ID {newspaper_id}")
+        if subscriber.id in issue.subscribers:
+            raise ValueError(f"Subscriber with ID {subscriber.id} already subscribed to an issue with ID {issue_id}")
+        else:
+            issue.subscribers.append(subscriber.id)
+            return issue
+
 
 
 

@@ -69,12 +69,19 @@ def test_issue_set_editor(client, agency):
     parsed = response.get_json()
     issue_response = parsed["issue"]
     assert issue_response["editor_id"] == agency.editors[0].editor_id
+def test_issue_delete(client, agency):
+    paper = agency.newspapers[1]
+    issue = paper.issues[1]
+    response = client.delete(f"/newspaper/{paper.paper_id}/issue/{issue.id}")
+    assert response.status_code == 200
+    assert issue not in paper.issues
 def test_issue_deliver(client, agency):
 
     paper = agency.newspapers[0]
     subscriber = agency.subscribers[0]
     issue = paper.issues[0]
     agency.subscribe(subscriber.id,paper.paper_id)
+    agency.subscribe_to_issue(subscriber.id,paper.paper_id,issue.id)
     response = client.post(f"/newspaper/{paper.paper_id}/issue/{issue.id}/deliver", json={"subscriber_id": subscriber.id})
     assert response.status_code == 200
     assert subscriber.id in issue.records

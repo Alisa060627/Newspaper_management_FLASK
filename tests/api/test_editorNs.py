@@ -18,7 +18,9 @@ def test_add_editor(client, agency):
     aditor_count_before = len(agency.editors)
     response = client.post("/editor/", json={
         "editor_name": "Micky Bauer",
-        "address": "Schönbrunner Straße 45"
+        "address": "Schönbrunner Straße 45",
+        "newspapers": [newspaper.paper_id for newspaper in agency.newspapers]
+
     })
     assert response.status_code == 200
     parsed = response.get_json()
@@ -30,7 +32,8 @@ def test_update_editor(client, agency):
     editor = agency.editors[0]
     response = client.post(f"/editor/{editor.editor_id}", json={
         "editor_name": "Alisa Beztsinna",
-        "address": "Karl-Eybl-Gasse 5"
+        "address": "Karl-Eybl-Gasse 5",
+        "newspapers": [newspaper.paper_id for newspaper in agency.newspapers]
     })
     assert response.status_code == 200
     parsed = response.get_json()

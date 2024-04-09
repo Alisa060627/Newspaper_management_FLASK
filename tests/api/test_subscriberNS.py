@@ -52,6 +52,14 @@ def test_subscribe(client, agency):
                             json={"newspaper_id": paper.paper_id})
     assert response.status_code == 200
     assert paper.paper_id in subscriber.newspapers
+def test_subscribe_issue(client, agency):
+    paper = agency.newspapers[0]
+    subscriber = agency.subscribers[0]
+    issue = paper.issues[0]
+    response = client.post(f"/subscriber/{subscriber.id}/subscribeissue",
+                            json={"newspaper_id": paper.paper_id, "issue_id": issue.id})
+    assert response.status_code == 200
+    assert subscriber.id in issue.subscribers
 def test_missing_issues(client, agency):
     paper = agency.newspapers[0]
     subscriber = agency.subscribers[0]

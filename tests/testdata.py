@@ -33,8 +33,8 @@ def create_subscribers(agency: Agency):
     agency.subscribers.extend([subscriber1, subscriber2, subscriber3, subscriber4])
 
 def create_editors(agency: Agency):
-    editor1 = Editor(editor_id=300, editor_name="Hans", address="Hauptstrasse 1")
-    editor2 = Editor(editor_id=301, editor_name="Franz", address="Hauptstrasse 2")
-    editor3 = Editor(editor_id=302, editor_name="Anna", address="Hauptstrasse 3")
-    editor4 = Editor(editor_id=303, editor_name="Peter", address="Hauptstrasse 4")
+    editor1 = Editor(editor_id=300, editor_name="Hans", address="Hauptstrasse 1", newspapers=[])
+    editor2 = Editor(editor_id=301, editor_name="Franz", address="Hauptstrasse 2",newspapers=[])
+    editor3 = Editor(editor_id=302, editor_name="Anna", address="Hauptstrasse 3",newspapers=[])
+    editor4 = Editor(editor_id=303, editor_name="Peter", address="Hauptstrasse 4", newspapers=[])
     agency.editors.extend([editor1, editor2, editor3, editor4])

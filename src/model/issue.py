@@ -7,6 +7,7 @@ class Issue(object):
         self.editor_id = editor_id
         self.number_of_pages = number_of_pages
         self.records = dict()
+        self.subscribers = []
     def set_editor(self, editor_id: int):
         if editor_id:
             self.editor_id = editor_id
@@ -21,6 +22,5 @@ class Issue(object):
             "number_of_pages": self.number_of_pages
         }
 
-    def remove_subscriber(self, subscriber: Subscriber):
-        if subscriber.id in self.records:
-            self.records.pop(subscriber.id)
+
+

@@ -15,10 +15,3 @@ def test_to_dict(agency):
     assert issue_dict["released"] == issue.released
     assert issue_dict["editor_id"] == issue.editor_id
     assert issue_dict["number_of_pages"] == issue.number_of_pages
-def test_remove_subscriber(agency):
-    issue = agency.newspapers[0].issues[0]
-    subscriber = agency.subscribers[0]
-    issue.remove_subscriber(subscriber)
-    subscribers = issue.records.keys()
-    assert subscriber not in subscribers
-
