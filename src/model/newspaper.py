@@ -18,10 +18,20 @@ class Newspaper(object):
         return self.issues
 
     def add_issue(self, issue: Issue):
-        if issue.id not in [i.id for i in self.issues]:
-            self.issues.append(issue)
+        if issue.id not in [i.id for i in self.issues]:#
+            if issue.number_of_pages > 0:
+                self.issues.append(issue)
+            else:
+                raise ValueError(f"Number of pages must be greater than 0")
         else:
             raise ValueError(f"Issue with ID {issue.id} already exists")
+    def remove_issue(self, issue_id: int):
+        if issue_id not in [i.id for i in self.issues]:
+            raise ValueError(f"No issue with ID {issue_id} found")
+        for issue in self.issues:
+            if issue.id == issue_id:
+                self.issues.remove(issue)
+
     def to_dict(self):
         return {
             "paper_id": self.paper_id,

@@ -65,6 +65,15 @@ class NewspaperIssueID(Resource):
             return issue.to_dict()
         except ValueError as e:
             abort(404, str(e))
+    @issue_ns.doc(description="Delete an issue of a newspaper")
+    def delete(self, paper_id, issue_id):
+        try:
+            targeted_paper = Agency.get_instance().get_newspaper(paper_id)
+            targeted_paper.remove_issue(issue_id)
+            return jsonify(f"Issue with ID {issue_id} was removed")
+        except ValueError as e:
+            abort(404, str(e))
+
 
 
 @issue_ns.route('/<int:paper_id>/issue/<int:issue_id>/release')
@@ -81,7 +90,7 @@ class NewspaperIssueRelease(Resource):
             abort(404, str(e))
 @issue_ns.route('/<int:paper_id>/issue/<int:issue_id>/editor')
 class NewspaperIssueEditor(Resource):
-    @issue_ns.doc(description="Update the editor of an issue of a newspaper")
+    @issue_ns.doc(description="Set an editor of an issue of a newspaper")
     @issue_ns.expect(editor_model, validate=True)
     @issue_ns.marshal_with(issue_model, envelope='issue')
     def post(self, paper_id,issue_id):

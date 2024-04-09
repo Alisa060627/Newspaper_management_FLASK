@@ -34,6 +34,16 @@ def test_get_issue_not_found(agency):
     issue_id = 9
     with pytest.raises(AttributeError, match = f"No issue with ID {issue_id} found"):
         newspaper.get_issue(issue_id)
+def test_remove_issue(agency):
+    newspaper = agency.newspapers[0]
+    issue = newspaper.issues[0]
+    newspaper.remove_issue(issue.id)
+    assert issue not in newspaper.issues
+def test_remove_issue_not_found(agency):
+    newspaper = agency.newspapers[0]
+    issue_id = 10
+    with pytest.raises(AttributeError, match = f"No issue with ID {issue_id} found"):
+        newspaper.remove_issue(issue_id)
 def test_to_dict(agency):
     newspaper = agency.newspapers[0]
     newspaper_dict = newspaper.to_dict()
