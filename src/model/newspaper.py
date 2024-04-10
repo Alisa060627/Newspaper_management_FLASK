@@ -44,4 +44,4 @@ class Newspaper(object):
             if issue.id == issue_id:
 
                 return issue
-        raise ValueError(f"No issue with ID {issue_id} found")
+        raise ValueError(f"No issue with ID {issue_id} in newspaper {self.paper_id} found")

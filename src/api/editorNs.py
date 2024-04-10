@@ -24,9 +24,10 @@ class EditorAPI(Resource):
         editor_id = int(part_id[:8]+part_id[4:8]+part_id[:4])+random.randint(0, 100)
         # create a new editor object and add it
         list1 = []
-        for i in editor_ns.payload['newspapers']:
-            list1.append(Agency.get_instance().get_newspaper(i))
         try:
+            for i in editor_ns.payload['newspapers']:
+                list1.append(Agency.get_instance().get_newspaper(i))
+
             new_editor = Editor(editor_id=editor_id,
                               editor_name = editor_ns.payload['editor_name'],
                               address=editor_ns.payload['address'],
