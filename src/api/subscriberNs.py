@@ -83,7 +83,7 @@ class SubscriberID(Resource):
             return jsonify(message)
         except ValueError as e:
             abort(404, str(e))
-@subscriber_ns.route('/<int:sub_id>/subscribe')
+@subscriber_ns.route('/<int:sub_id>/subscribe')#route to subscribe to a newspaper
 class SubsriberSubscribe(Resource):
     @subscriber_ns.doc(description="Subscribe to a newspaper")
     @subscriber_ns.expect(subscribtion_model, validate=True)
@@ -94,7 +94,7 @@ class SubsriberSubscribe(Resource):
             return jsonify(message)
         except ValueError as e:
             abort(404, str(e))
-@subscriber_ns.route('/<int:sub_id>/subscribeissue')
+@subscriber_ns.route('/<int:sub_id>/subscribeissue')#route to subscribe to an issue
 class SubscriberIssue(Resource):
     @subscriber_ns.doc(description="Subscribe to an issue")
     @subscriber_ns.expect(subscribeissue_model, validate=True)
@@ -112,7 +112,6 @@ class SubscriberMissingIssues(Resource):
     def get(self, sub_id):
         try:
             missing_issues = Agency.get_instance().missing_issues(sub_id)
-            #missing_issues = [issue.to_dict() for issue in missing_issues]
             return missing_issues
         except ValueError as e:
             abort(404, str(e))

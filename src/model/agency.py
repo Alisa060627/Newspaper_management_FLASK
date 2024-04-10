@@ -99,20 +99,19 @@ class Agency(object):
             raise ValueError(f"No editor with ID {editor.editor_id} found")
         else:
             self.editors.remove(editor)
-            list1 = []
+            for newspaper in self.newspapers:
+                for issue in newspaper.issues:
+                    if issue.editor_id == editor_id:
+                        for editor1 in self.editors:
+                            if newspaper in editor1.newspapers:
+                                issue.editor_id = editor1.editor_id
+                                break
+
             for newspaper in editor.newspapers:
                 for issue in newspaper.issues:
-                    for editor in self.editors:
-                        if newspaper in editor.newspapers:
-                            list1.append(editor)
-                    new_editor = list1[0] if list1 else None
+                    if issue.editor_id == editor_id:
+                        issue.editor_id  =  0
 
-                    # Update the editor ID of the issue
-                    issue.editor_id = new_editor.editor_id if new_editor else 0
-
-                    # Add the newspaper to the new editor if available
-                    if new_editor:
-                        new_editor.add_newspaper(newspaper)
 
     def add_subscriber(self, subscriber: Subscriber):
         if subscriber.id in [sub.id for sub in self.subscribers]:
@@ -161,7 +160,6 @@ class Agency(object):
             raise ValueError(f"No subscriber with ID {subscriber.id} found")
         else:
             diction = dict()
-            missing_issues = []
             list1 = []
             for newspaper in self.newspapers:
                 for issue in newspaper.issues:
@@ -177,7 +175,7 @@ class Agency(object):
                 list1.append({"newspaper_id": k, "missing_issues": v})
             return list1
 
-    def get_stats(self, sub_id: Union[int,str]):
+    def get_stats(self, sub_id: Union[int,str]):#stats of subscriber
          subscriber = self.get_subscriber(sub_id)
          if subscriber not in self.subscribers:
             raise ValueError(f"No subscriber with ID {subscriber.id} found")
@@ -204,7 +202,7 @@ class Agency(object):
                  "newspapers": list1
              }
 
-    def get_stats_paper(self, paper_id: Union[int,str]):
+    def get_stats_paper(self, paper_id: Union[int,str]):#stats of newspaper
         newspaper = self.get_newspaper(paper_id)
         if newspaper not in self.newspapers:
             raise ValueError(f"No newspaper with ID {paper_id} found")
@@ -219,7 +217,7 @@ class Agency(object):
                 "annual_revenue": num * newspaper.price * newspaper.frequency * 12
             }
 
-    def deliver(self, sub_id , issue_id: int, newspaper_id: int):
+    def deliver(self, sub_id , issue_id: int, newspaper_id: int):#deliver issue to subscriber
         subscriber = self.get_subscriber(sub_id)
         if subscriber not in self.subscribers:
             raise ValueError(f"No subscriber with ID {subscriber.id} found")
@@ -258,7 +256,7 @@ class Agency(object):
         else:
             subscriber.newspapers.append(newspaper_id)
             return subscriber
-    def subscribe_to_issue(self, sub_id, newspaper_id: int, issue_id: int):
+    def subscribe_to_issue(self, sub_id, newspaper_id: int, issue_id: int):#subscribe to an issue
         subscriber = self.get_subscriber(sub_id)
         if subscriber not in self.subscribers:
             raise ValueError(f"No subscriber with ID {subscriber.id} found")
